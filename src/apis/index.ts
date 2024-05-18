@@ -1,4 +1,4 @@
-import { User } from '@/types'
+import { Role, User } from '@/types'
 import { request } from '@/utils'
 
 export const login = (data: {
@@ -38,5 +38,16 @@ export const resetPassword = (
   id: string,
   password: string
 ): Promise<boolean> => {
-  return request.put(`/users/${id}/reset-password`, { password })
+  return request.put(`/users/${id}/password`, { password })
+}
+
+export const updateUserInfo = (
+  id: string,
+  data: {
+    username: string
+    nickname: string
+    role: Role
+  }
+): Promise<boolean> => {
+  return request.put(`/users/${id}`, data)
 }

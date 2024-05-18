@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { deleteUser, queryUserList, resetPassword } from '@/apis'
+import {
+  deleteUser,
+  queryUserList,
+  resetPassword,
+  updateUserInfo
+} from '@/apis'
+import { useStore } from '@/store'
 import { User, Role } from '@/types'
 import dayjs from 'dayjs'
 import {
@@ -17,12 +23,27 @@ import { h, reactive, ref } from 'vue'
 const dialog = useDialog()
 const message = useMessage()
 
-const modalShow = ref(false)
-const formValue = reactive({
+const store = useStore()
+
+const pswModalShow = ref(false)
+const pswFormValue = reactive({
   password: ''
+})
+const infoModalShow = ref(false)
+const infoFormValue = reactive({
+  username: '',
+  nickname: '',
+  role: Role.User
 })
 const selectedUser = ref<User | null>(null)
 const formRef = ref<FormInst | null>(null)
+const infoFormRef = ref<FormInst | null>(null)
+
+const roleMap = {
+  [Role.SYS_ADMIN]: '超级管理员',
+  [Role.Admin]: '管理员',
+  [Role.User]: '普通用户'
+}
 
 const pagination = reactive({
   page: 1,
@@ -83,7 +104,7 @@ const columns: DataTableColumns<User> = [
     title: '角色',
     key: 'role',
     render(rowData) {
-      return h(NTag, rowData.role === Role.Admin ? '管理员' : '普通用户')
+      return h(NTag, roleMap[rowData.role])
     }
   },
   {
@@ -112,8 +133,11 @@ const columns: DataTableColumns<User> = [
             type: 'info',
             size: 'small',
             secondary: true,
+            disabled:
+              rowData.role === Role.Admin &&
+              store.userInfo?.role !== Role.SYS_ADMIN,
             onClick: () => {
-              modalShow.value = true
+              pswModalShow.value = true
               selectedUser.value = rowData
             }
           },
@@ -122,9 +146,32 @@ const columns: DataTableColumns<User> = [
         h(
           NButton,
           {
+            type: 'primary',
+            size: 'small',
+            secondary: true,
+            disabled:
+              rowData.role === Role.Admin &&
+              store.userInfo?.role !== Role.SYS_ADMIN,
+            onClick: () => {
+              infoModalShow.value = true
+              selectedUser.value = rowData
+              infoFormValue.username = rowData.username
+              infoFormValue.nickname = rowData.nickname || ''
+              infoFormValue.role = rowData.role
+            }
+          },
+          { default: () => '编辑' }
+        ),
+        h(
+          NButton,
+          {
             type: 'error',
             size: 'small',
             secondary: true,
+            disabled:
+              (rowData.role === Role.Admin &&
+                store.userInfo?.role !== Role.SYS_ADMIN) ||
+              rowData._id === store.userInfo?._id,
             onClick: () => {
               dialog.create({
                 title: '删除用户',
@@ -153,16 +200,17 @@ const columns: DataTableColumns<User> = [
 ]
 
 const onCancel = () => {
-  modalShow.value = false
-  formValue.password = ''
+  pswModalShow.value = false
+  pswFormValue.password = ''
+  infoModalShow.value = false
   selectedUser.value = null
 }
 
 const onConfirm = () => {
   formRef.value?.validate().then(() => {
     if (selectedUser.value) {
-      modalShow.value = false
-      resetPassword(selectedUser.value?._id, formValue.password)
+      pswModalShow.value = false
+      resetPassword(selectedUser.value?._id, pswFormValue.password)
         .then((success) => {
           if (success) {
             message.success('重置密码成功')
@@ -170,9 +218,45 @@ const onConfirm = () => {
             message.error('重置密码失败')
           }
         })
+        .catch((e) => {
+          console.log('✨  ~ formRef.value?.validate ~ e:', e)
+          message.error(e.message)
+        })
         .finally(() => {
-          formValue.password = ''
+          pswFormValue.password = ''
           selectedUser.value = null
+          getUserList()
+        })
+    }
+  })
+}
+
+const onInfoConfirm = () => {
+  infoFormRef.value?.validate().then(() => {
+    if (selectedUser.value) {
+      infoModalShow.value = false
+      console.log(
+        '✨  ~ onInfoConfirm ~ infoFormValue:',
+        infoFormValue,
+        selectedUser.value
+      )
+
+      updateUserInfo(selectedUser.value._id, infoFormValue)
+        .then((success) => {
+          if (success) {
+            message.success('更新用户信息成功')
+          } else {
+            message.error('更新用户信息失败')
+          }
+        })
+        .catch((e) => {
+          message.error(e.message)
+        })
+        .finally(() => {
+          selectedUser.value = null
+          infoFormValue.username = ''
+          infoFormValue.nickname = ''
+          infoFormValue.role = Role.User
           getUserList()
         })
     }
@@ -192,7 +276,7 @@ const onConfirm = () => {
     />
   </div>
   <n-modal
-    :show="modalShow"
+    :show="pswModalShow"
     title="重置密码"
     preset="dialog"
     @close="onCancel"
@@ -201,7 +285,7 @@ const onConfirm = () => {
   >
     <n-form
       ref="formRef"
-      :model="formValue"
+      :model="pswFormValue"
       :rules="{
         password: [
           { required: true, message: '请输入新密码', trigger: 'blur' },
@@ -211,7 +295,7 @@ const onConfirm = () => {
     >
       <n-form-item path="password">
         <n-input
-          v-model:value="formValue.password"
+          v-model:value="pswFormValue.password"
           show-count
           :maxlength="20"
           placeholder="请输入新密码"
@@ -221,6 +305,52 @@ const onConfirm = () => {
     <template #action>
       <n-button @click="onCancel">取消</n-button>
       <n-button type="primary" @click="onConfirm">确定</n-button>
+    </template>
+  </n-modal>
+  <n-modal
+    :show="infoModalShow"
+    title="编辑信息"
+    preset="dialog"
+    @close="onCancel"
+    @negative-click="onCancel"
+    :mask-closable="false"
+  >
+    <n-form ref="infoFormRef" :model="infoFormValue">
+      <n-form-item label="用户名" path="username">
+        <n-input
+          v-model:value="infoFormValue.username"
+          placeholder="请输入用户名"
+        />
+      </n-form-item>
+      <n-form-item label="昵称" path="nickname">
+        <n-input
+          v-model:value="infoFormValue.nickname"
+          placeholder="请输入昵称"
+        />
+      </n-form-item>
+      <n-form-item label="角色" path="role">
+        <n-select
+          v-model:value="infoFormValue.role"
+          placeholder="请选择角色"
+          :options="[
+            { label: '超级管理员', value: Role.SYS_ADMIN, disabled: true },
+            {
+              label: '管理员',
+              value: Role.Admin,
+              disabled: selectedUser?.role === Role.SYS_ADMIN
+            },
+            {
+              label: '普通用户',
+              value: Role.User,
+              disabled: selectedUser?.role === Role.SYS_ADMIN
+            }
+          ]"
+        />
+      </n-form-item>
+    </n-form>
+    <template #action>
+      <n-button @click="onCancel">取消</n-button>
+      <n-button type="primary" @click="onInfoConfirm">确定</n-button>
     </template>
   </n-modal>
 </template>
