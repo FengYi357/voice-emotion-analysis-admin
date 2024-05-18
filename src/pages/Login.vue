@@ -28,12 +28,12 @@ const onLogin = () => {
           store.userInfo = res.userInfo
           router.push('/')
         })
-        .catch(() => {
-          message.error('登录失败')
+        .catch((e) => {
+          message.error(e.message)
         })
     )
-    .catch(() => {
-      message.error('请检查输入')
+    .catch((e) => {
+      message.error(e.message)
     })
 }
 </script>

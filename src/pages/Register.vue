@@ -23,12 +23,12 @@ const onRegister = () => {
           message.success('注册成功')
           router.push('/login')
         })
-        .catch(() => {
-          message.error('注册失败')
+        .catch((e) => {
+          message.error(e.message)
         })
     )
-    .catch(() => {
-      message.error('请检查输入')
+    .catch((e) => {
+      message.error(e.message)
     })
 }
 </script>

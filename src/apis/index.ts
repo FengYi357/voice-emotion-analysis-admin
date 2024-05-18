@@ -7,7 +7,7 @@ export const login = (data: {
 }): Promise<{
   access_token: string
   userInfo: User
-}> => request.post('/users/login', data)
+}> => request.post('/users/admin/login', data)
 
 export const register = (data: {
   username: string
