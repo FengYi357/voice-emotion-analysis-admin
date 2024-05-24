@@ -23,3 +23,12 @@ export interface Advice {
   createdAt: string
   updatedAt: string
 }
+
+export interface Share {
+  _id: string
+  title: string
+  content: string
+  user: User
+  createdAt: string
+  updatedAt: string
+}

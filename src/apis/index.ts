@@ -1,4 +1,4 @@
-import { Advice, Role, User } from '@/types'
+import { Advice, Role, Share, User } from '@/types'
 import { request } from '@/utils'
 
 export const login = (data: {
@@ -77,4 +77,22 @@ export const updateAdvice = (
   }
 ): Promise<boolean> => {
   return request.put(`/advices/${id}/reply`, data)
+}
+
+export const queryShareList = (
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{
+  list: Share[]
+  total: number
+}> =>
+  request.get('/shares/admin', {
+    params: {
+      page,
+      pageSize
+    }
+  })
+
+export const deleteShare = (id: string): Promise<boolean> => {
+  return request.delete(`/shares/${id}`)
 }

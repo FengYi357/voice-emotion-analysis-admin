@@ -20,6 +20,11 @@ const routes: RouterOptions['routes'] = [
         path: '/advice',
         name: 'advice',
         component: () => import('@/pages/Advice.vue')
+      },
+      {
+        path: '/share',
+        name: 'share',
+        component: () => import('@/pages/Share.vue')
       }
     ]
   },

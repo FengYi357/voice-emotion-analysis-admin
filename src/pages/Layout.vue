@@ -60,6 +60,16 @@ const menuOptions: MenuOption[] = [
       ),
     key: 'advice',
     icon: renderIcon(Help)
+  },
+  {
+    label: () =>
+      h(
+        RouterLink,
+        { to: { name: 'share' } },
+        { default: () => t('menu.share') }
+      ),
+    key: 'share',
+    icon: renderIcon(Help)
   }
 ]
 

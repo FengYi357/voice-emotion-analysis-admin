@@ -5,6 +5,7 @@ export const en = {
   menu: {
     user: 'User Manage',
     advice: 'User Feedback',
-    logout: 'Logout'
+    logout: 'Logout',
+    share: 'Share Manage'
   }
 }
