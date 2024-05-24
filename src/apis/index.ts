@@ -1,4 +1,4 @@
-import { Role, User } from '@/types'
+import { Advice, Role, User } from '@/types'
 import { request } from '@/utils'
 
 export const login = (data: {
@@ -50,4 +50,31 @@ export const updateUserInfo = (
   }
 ): Promise<boolean> => {
   return request.put(`/users/${id}`, data)
+}
+
+export const queryAdviceList = (
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{
+  list: Advice[]
+  total: number
+}> =>
+  request.get('/advices/admin', {
+    params: {
+      page,
+      pageSize
+    }
+  })
+
+export const deleteAdvice = (id: string): Promise<boolean> => {
+  return request.delete(`/advices/${id}`)
+}
+
+export const updateAdvice = (
+  id: string,
+  data: {
+    reply: string
+  }
+): Promise<boolean> => {
+  return request.put(`/advices/${id}/reply`, data)
 }

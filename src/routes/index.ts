@@ -15,6 +15,11 @@ const routes: RouterOptions['routes'] = [
         path: '/user',
         name: 'user',
         component: () => import('@/pages/User.vue')
+      },
+      {
+        path: '/advice',
+        name: 'advice',
+        component: () => import('@/pages/Advice.vue')
       }
     ]
   },

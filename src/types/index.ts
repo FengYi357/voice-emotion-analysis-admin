@@ -13,3 +13,13 @@ export interface User {
   createdAt: string
   updatedAt: string
 }
+
+export interface Advice {
+  _id: string
+  title: string
+  content: string
+  reply?: string
+  user: User
+  createdAt: string
+  updatedAt: string
+}

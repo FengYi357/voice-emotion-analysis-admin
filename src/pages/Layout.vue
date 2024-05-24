@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LanguageOutline, PersonOutline } from '@vicons/ionicons5'
+import { LanguageOutline, PersonOutline, Help } from '@vicons/ionicons5'
 import { DropdownProps, MenuOption } from 'naive-ui'
 import { h } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -50,6 +50,16 @@ const menuOptions: MenuOption[] = [
       ),
     key: 'user',
     icon: renderIcon(PersonOutline)
+  },
+  {
+    label: () =>
+      h(
+        RouterLink,
+        { to: { name: 'advice' } },
+        { default: () => t('menu.advice') }
+      ),
+    key: 'advice',
+    icon: renderIcon(Help)
   }
 ]
 
