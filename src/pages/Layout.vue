@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { LanguageOutline, PersonOutline, Help } from '@vicons/ionicons5'
+import {
+  LanguageOutline,
+  PersonOutline,
+  Help,
+  ShareSocialOutline
+} from '@vicons/ionicons5'
 import { DropdownProps, MenuOption } from 'naive-ui'
 import { h } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -69,7 +74,7 @@ const menuOptions: MenuOption[] = [
         { default: () => t('menu.share') }
       ),
     key: 'share',
-    icon: renderIcon(Help)
+    icon: renderIcon(ShareSocialOutline)
   }
 ]
 
